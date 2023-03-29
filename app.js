@@ -6,7 +6,6 @@ const port = process.env.PORT || 3000;
 
 app.get('/listUsers', function (req, res) {
     fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
-       console.log( data );
        res.end( data );
     });
  })
