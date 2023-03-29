@@ -7,7 +7,7 @@ const io = require('socket.io')(httpServer, {
 
 const port = process.env.PORT || 3000;
 
-app.get('/listUsers', function (req, res) {
+app.get('/', function (req, res) {
     fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
        res.end( data );
     });
@@ -26,5 +26,5 @@ app.get('/listUsers', function (req, res) {
       console.log('a user disconnected!');
     });
   });
-  
+
  httpServer.listen(port, () => console.log(`listening on port ${port}`));
