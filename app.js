@@ -6,6 +6,7 @@ const io = require('socket.io')(httpServer, {
   });
 
 const port = process.env.PORT || 3000;
+const users1 = new Map();
 
 app.get('/', function (req, res) {
     fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
@@ -14,12 +15,14 @@ app.get('/', function (req, res) {
  })
 
  io.on('connection', (socket) => {
-    console.log('a user connected');
+
+    socket.on('connection',(UserId)=>{
+        console.log('user '+UserId+ ' connected');
+        users1.set(UserId,socket);
+    });
   
-    socket.on('message', (message) => {
-      console.log(message);
-      // socket.broadcast.to('ID').emit( 'send msg', {somedata : somedata_server} );
-      io.emit('message', `${socket.id}: ${message}`);
+    socket.on('message', (data) => {
+        users1.get(data.toId).emit('message', {"fromId":data.fromId,"message": data.message});
     });
   
     socket.on('disconnect', () => {
