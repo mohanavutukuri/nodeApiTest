@@ -6,7 +6,7 @@ const io = require('socket.io')(httpServer, {
   });
 
 const port = process.env.PORT || 3000;
-const users1 = new Map();
+users1 = new Map();
 
 app.get('/', function (req, res) {
     fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
@@ -18,11 +18,14 @@ app.get('/', function (req, res) {
 
     socket.on('connection',(UserId)=>{
         console.log('user '+UserId+ ' connected');
-        users1.set(UserId,socket);
+        users1.set(UserId,socket.id);
+        io.emit('connection', [...users1.keys()]);
     });
   
+
     socket.on('message', (data) => {
-        users1.get(data.toId).emit('message', {"fromId":data.fromId,"message": data.message});
+        io.to(users1.get(data.toId.toString())).emit('message', {"fromId":data.fromId,"message": data.message});
+        // users1.get(data.toId).emit('message', {"fromId":data.fromId,"message": data.message});
     });
   
     socket.on('disconnect', () => {
