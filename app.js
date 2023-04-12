@@ -7,6 +7,7 @@ const io = require('socket.io')(httpServer, {
 
 const port = process.env.PORT || 3000;
 users1 = new Map();
+var users=new Array();
 
 app.get('/:id',function(req,res){
   var id = req.params['id'] 
@@ -27,28 +28,39 @@ app.get('/', function (req, res) {
 
  io.on('connection', (socket) => {
 
-    socket.on('connection',(UserId)=>{
-        console.log('user '+UserId+ ' connected');
-        users1.set(UserId,socket.id);
-        io.emit('connection', [...users1.keys()]);
+    socket.on('connection',(user)=>{
+        users.push(user);
+        console.log('user '+user.id+ ' connected');
+        users1.set(user.id,socket.id);
+        io.emit('connection', users);
     });
   
+    socket.on('setnewTime',(data)=>{
+      io.emit("newtime",data);
+    })
 
+    socket.on("togglePlay",(data)=>{
+      io.emit("toggle",data);
+    })
     socket.on('message', (data) => {
-        io.to(users1.get(data.toId.toString())).emit('message', data);
+      io.emit('message', data);
+        // io.to(users1.get(data.toId.toString())).emit('message', data);
         // users1.get(data.toId).emit('message', {"fromId":data.fromId,"message": data.message});
     });
   
     socket.on('disconnect', () => {
       for (let [key, value] of users1.entries()) {
         if (value === socket.id){
+          users=users.filter((data)=>{
+            return key!=data.id;
+          });
           console.log('user '+ key +' disconnected');
           users1.delete(key);
         }
         
       }
 
-      io.emit('connection', [...users1.keys()]);
+      io.emit('connection', users);
     });
   });
 
